@@ -1,24 +1,48 @@
 import numpy as np
 
-def measure_curvature_pixels(left_fit, right_fit, y_eval, xm_per_pix, ym_per_pix):
-    """
-    Calculates the curvature of polynomial functions in pixels.
-    (This is a placeholder as we are currently using linear lines from Hough)
-    For linear Hough lines, curvature is technically infinite (straight lines).
-    For more advanced sliding window (polynomial fit), we would use the polynomial coefficients.
-    
-    Since we are using Hough Transform (Linear), we will return 0 or a large number for radius,
-    or we can implement a basic fit if text output requires it.
-    
-    For this specific pipeline flow (Hough -> Geometry), we are approximating lanes as straight lines 
-    in the immediate ROI or we'd need to fit a polynomial to the points derived from the Hough lines.
-    """
-    # Placeholder for linear implementation
-    return 0.0, 0.0
-
-def measure_curvature_real(left_fit_cr, right_fit_cr, y_eval):
+def measure_curvature_real(left_fit, right_fit, y_eval, xm_per_pix, ym_per_pix):
     '''
     Calculates the curvature of polynomial functions in meters.
     '''
-    # Placeholder as we are using linear lines currently.
-    return 0.0, 0.0
+    # We want curvature in meters
+    # Fit new polynomials to x,y in world space
+    
+    # Actually, we can use the formula directly with conversion factors if we had fit in world space.
+    # But usually we fit in pixel space. 
+    # R_curve = ((1 + (2Ay + B)^2)^1.5) / |2A|
+    
+    # Let's adjust derivation for pixel-space fit -> world-space curvature
+    # Or typically: re-fit in world space inside the pipeline, or just approximate here.
+    
+    # Assuming left_fit and right_fit are in pixels.
+    # We need to scale them or just return pixel curvature for now if world mapping is complex.
+    # BUT, the standard way is:
+    # x = A*y^2 + B*y + C  (pixels)
+    # x_m = A_m * y_m^2 + B_m * y_m + C_m
+    # A_m = mx / my^2 * A
+    # B_m = mx / my * B
+    
+    left_curverad_m = 0
+    right_curverad_m = 0
+    
+    if left_fit is not None:
+        A = left_fit[0]
+        B = left_fit[1]
+        
+        A_m = xm_per_pix / (ym_per_pix**2) * A
+        B_m = xm_per_pix / ym_per_pix * B
+        
+        y_eval_m = y_eval * ym_per_pix
+        left_curverad_m = ((1 + (2*A_m*y_eval_m + B_m)**2)**1.5) / np.abs(2*A_m)
+        
+    if right_fit is not None:
+        A = right_fit[0]
+        B = right_fit[1]
+        
+        A_m = xm_per_pix / (ym_per_pix**2) * A
+        B_m = xm_per_pix / ym_per_pix * B
+        
+        y_eval_m = y_eval * ym_per_pix
+        right_curverad_m = ((1 + (2*A_m*y_eval_m + B_m)**2)**1.5) / np.abs(2*A_m)
+
+    return left_curverad_m, right_curverad_m
