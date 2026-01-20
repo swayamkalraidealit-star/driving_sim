@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+
+# Project specific
+outputs/videos/*.mp4
+outputs/images/*.jpg
+outputs/images/*.png
+data/raw/*.mp4
+data/samples/*.jpg
+
+# IDEs
+.vscode/
+.idea/
