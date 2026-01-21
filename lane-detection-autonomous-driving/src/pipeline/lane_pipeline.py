@@ -6,6 +6,7 @@ from src.perception import edge_detection, roi, perspective_transform, lane_dete
 from src.geometry import steering_angle, lane_geometry
 from src.tracking import lane_line
 from src.visualization import overlay
+from src.control.pid_controller import PIDController
 
 class LanePipeline:
     def __init__(self):
@@ -13,6 +14,13 @@ class LanePipeline:
         # Initialize LaneLine trackers
         self.left_lane = lane_line.LaneLine(alpha=0.2)
         self.right_lane = lane_line.LaneLine(alpha=0.2)
+        
+        # Initialize PID Controller
+        self.pid_controller = PIDController(
+            kp=settings.STEERING_KP,
+            ki=settings.STEERING_KI,
+            kd=settings.STEERING_KD
+        )
 
     def process_frame(self, frame):
         # 0. Resize
@@ -59,7 +67,10 @@ class LanePipeline:
         # 6. Geometry & Steering
         # Calculate offset in pixels at the bottom of the image
         offset = steering_angle.calculate_vehicle_offset(frame.shape[1], best_left, best_right, frame.shape[0], self.settings.XM_PER_PIX)
-        st_angle = steering_angle.calculate_steering_angle(offset, max_offset_meters=1.5) # Allow 1.5m offset for max steering
+        
+        # PID Control Update
+        # Assuming 30 FPS, dt = 1/30 approx 0.033
+        st_angle = self.pid_controller.update(offset, dt=0.033)
         
         # Calculate Curvature
         left_curverad, right_curverad = lane_geometry.measure_curvature_real(best_left, best_right, frame.shape[0], self.settings.XM_PER_PIX, self.settings.YM_PER_PIX)

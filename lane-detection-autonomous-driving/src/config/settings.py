@@ -41,3 +41,8 @@ YM_PER_PIX = 30 / 720      # Meters per pixel in y dimension
 # Paths
 VIDEO_INPUT_PATH = 'data/raw/test_video.mp4'
 VIDEO_OUTPUT_PATH = 'outputs/videos/test_video_output.mp4'
+
+# PID Controller Parameters
+STEERING_KP = 25.0   # Proportional gain (similar to previous implicit gain)
+STEERING_KI = 0.05   # Integral gain (small correction for steady state error)
+STEERING_KD = 5.0    # Derivative gain (damping for oscillation)
